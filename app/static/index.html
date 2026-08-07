@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Agent RAG — Documentation NovaTrack</title>
+        <link rel="stylesheet" href="/static/styles.css" />
+    </head>
+    <body>
+        <header>
+            <div class="brand">
+                <span class="dot"></span>
+                <div>
+                    Agent RAG — Démo
+                    <small>Documentation interne de NovaTrack (fictive)</small>
+                </div>
+            </div>
+            <span class="badge">Claude API</span>
+        </header>
+
+        <main>
+            <div id="messages">
+                <div class="empty-state" id="empty-state">
+                    <h2>Pose une question sur la documentation NovaTrack</h2>
+                    <p>Cet agent répond uniquement à partir des documents indexés (guide produit, FAQ, politique de remboursement) et cite ses sources.</p>
+                    <div class="examples">
+                        <button type="button" data-q="Quels sont les forfaits disponibles et leurs prix ?">Quels sont les forfaits disponibles et leurs prix ?</button>
+                        <button type="button" data-q="Comment obtenir un remboursement ?">Comment obtenir un remboursement ?</button>
+                        <button type="button" data-q="Quelle est la taille maximale d'une pièce jointe ?">Quelle est la taille maximale d'une pièce jointe ?</button>
+                    </div>
+                </div>
+            </div>
+
+            <form id="chat-form">
+                <input type="text" id="question" placeholder="Pose ta question..." autocomplete="off" />
+                <button type="submit" aria-label="Envoyer">➤</button>
+            </form>
+        </main>
+
+        <footer>
+            Démo technique — <a href="https://github.com/JonathanRochelli" target="_blank" rel="noopener">JonathanRochelli</a>
+        </footer>
+
+        <script src="/static/app.js"></script>
+    </body>
+</html>
