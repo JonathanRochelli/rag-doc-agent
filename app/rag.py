@@ -27,13 +27,13 @@ _embedder: SentenceTransformer | None = None
 _ready_lock = asyncio.Lock()
 _index_ready = False
 
-SYSTEM_PROMPT = """Tu es un assistant qui répond aux questions UNIQUEMENT à partir des documents fournis dans le message de l'utilisateur.
+SYSTEM_PROMPT = """You are an assistant that answers questions ONLY from the documents provided in the user's message.
 
-Règles :
-- Base chaque réponse exclusivement sur le contenu des documents fournis, jamais sur des connaissances externes.
-- Cite systématiquement la source de chaque information avec la notation [source: nom_du_fichier].
-- Si l'information demandée n'est pas présente dans les documents, dis-le clairement plutôt que d'inventer une réponse.
-- Réponds de façon concise et directe."""
+Rules:
+- Base every answer exclusively on the content of the provided documents, never on outside knowledge.
+- Always cite the source of each piece of information using the notation [source: file_name].
+- If the requested information is not present in the documents, say so clearly instead of making up an answer.
+- Answer concisely and directly."""
 
 
 async def _ensure_ready() -> SentenceTransformer:
@@ -71,14 +71,14 @@ async def retrieve(query: str, top_k: int = TOP_K) -> list[dict]:
     documents = results.get("documents") or [[]]
     metadatas = results.get("metadatas") or [[]]
     return [
-        {"text": text, "source": meta.get("source", "inconnu")}
+        {"text": text, "source": meta.get("source", "unknown")}
         for text, meta in zip(documents[0], metadatas[0])
     ]
 
 
 def build_context_block(chunks: list[dict]) -> str:
     if not chunks:
-        return "(aucun document pertinent trouvé)"
+        return "(no relevant document found)"
     return "\n\n".join(
         f'<document source="{c["source"]}">\n{c["text"]}\n</document>' for c in chunks
     )
@@ -87,7 +87,7 @@ def build_context_block(chunks: list[dict]) -> str:
 async def stream_answer(question: str) -> AsyncIterator[dict]:
     chunks = await retrieve(question)
     context_block = build_context_block(chunks)
-    user_message = f"<documents>\n{context_block}\n</documents>\n\nQuestion : {question}"
+    user_message = f"<documents>\n{context_block}\n</documents>\n\nQuestion: {question}"
 
     sources = sorted({c["source"] for c in chunks})
     yield {"type": "sources", "sources": sources}
@@ -95,7 +95,7 @@ async def stream_answer(question: str) -> AsyncIterator[dict]:
     if not ANTHROPIC_API_KEY:
         yield {
             "type": "error",
-            "message": "Aucune clé API Anthropic configurée. Renseigne ANTHROPIC_API_KEY dans le fichier .env.",
+            "message": "No Anthropic API key configured. Set ANTHROPIC_API_KEY in your .env file.",
         }
         return
 
@@ -112,14 +112,14 @@ async def stream_answer(question: str) -> AsyncIterator[dict]:
     except anthropic.AuthenticationError:
         yield {
             "type": "error",
-            "message": "Clé API Anthropic invalide. Vérifie la variable ANTHROPIC_API_KEY.",
+            "message": "Invalid Anthropic API key. Check the ANTHROPIC_API_KEY variable.",
         }
     except anthropic.APIConnectionError:
-        yield {"type": "error", "message": "Impossible de contacter l'API Anthropic."}
+        yield {"type": "error", "message": "Could not reach the Anthropic API."}
     except anthropic.APIStatusError as exc:
-        yield {"type": "error", "message": f"Erreur API Claude ({exc.status_code})."}
+        yield {"type": "error", "message": f"Claude API error ({exc.status_code})."}
     except Exception:
         yield {
             "type": "error",
-            "message": "Erreur inattendue lors de la génération de la réponse.",
+            "message": "Unexpected error while generating the answer.",
         }

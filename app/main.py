@@ -22,7 +22,7 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Agent RAG sur documents", lifespan=lifespan)
+app = FastAPI(title="Document RAG Agent", lifespan=lifespan)
 
 
 class ChatRequest(BaseModel):

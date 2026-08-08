@@ -87,7 +87,7 @@
 
       addSources(pendingSources);
     } catch (err) {
-      addMessage("error", "Erreur réseau : impossible de contacter le serveur.");
+      addMessage("error", "Network error: could not reach the server.");
     } finally {
       cursor.remove();
       submitBtn.disabled = false;

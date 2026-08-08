@@ -38,12 +38,12 @@ def ingest_into(collection, model, documents_dir: Path = DOCUMENTS_DIR) -> int:
             metadatas.append({"source": path.name})
 
     if not texts:
-        print(f"Aucun document trouvé dans {documents_dir}")
+        print(f"No documents found in {documents_dir}")
         return 0
 
     embeddings = model.encode(texts, show_progress_bar=True).tolist()
     collection.add(ids=ids, documents=texts, metadatas=metadatas, embeddings=embeddings)
-    print(f"{len(texts)} chunks indexés depuis {documents_dir}")
+    print(f"{len(texts)} chunks indexed from {documents_dir}")
     return len(texts)
 
 

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Agent RAG — Documentation NovaTrack</title>
+        <title>RAG Agent — NovaTrack Docs</title>
         <link rel="stylesheet" href="/static/styles.css" />
     </head>
     <body>
@@ -11,8 +11,8 @@
             <div class="brand">
                 <span class="dot"></span>
                 <div>
-                    Agent RAG — Démo
-                    <small>Documentation interne de NovaTrack (fictive)</small>
+                    RAG Agent — Demo
+                    <small>NovaTrack internal documentation (fictional)</small>
                 </div>
             </div>
             <span class="badge">Claude API</span>
@@ -21,24 +21,24 @@
         <main>
             <div id="messages">
                 <div class="empty-state" id="empty-state">
-                    <h2>Pose une question sur la documentation NovaTrack</h2>
-                    <p>Cet agent répond uniquement à partir des documents indexés (guide produit, FAQ, politique de remboursement) et cite ses sources.</p>
+                    <h2>Ask a question about the NovaTrack documentation</h2>
+                    <p>This agent answers only from the indexed documents (product guide, FAQ, refund policy) and cites its sources.</p>
                     <div class="examples">
-                        <button type="button" data-q="Quels sont les forfaits disponibles et leurs prix ?">Quels sont les forfaits disponibles et leurs prix ?</button>
-                        <button type="button" data-q="Comment obtenir un remboursement ?">Comment obtenir un remboursement ?</button>
-                        <button type="button" data-q="Quelle est la taille maximale d'une pièce jointe ?">Quelle est la taille maximale d'une pièce jointe ?</button>
+                        <button type="button" data-q="What plans are available and how much do they cost?">What plans are available and how much do they cost?</button>
+                        <button type="button" data-q="How do I request a refund?">How do I request a refund?</button>
+                        <button type="button" data-q="What's the maximum size for an attachment?">What's the maximum size for an attachment?</button>
                     </div>
                 </div>
             </div>
 
             <form id="chat-form">
-                <input type="text" id="question" placeholder="Pose ta question..." autocomplete="off" />
-                <button type="submit" aria-label="Envoyer">➤</button>
+                <input type="text" id="question" placeholder="Ask your question..." autocomplete="off" />
+                <button type="submit" aria-label="Send">➤</button>
             </form>
         </main>
 
         <footer>
-            Démo technique — <a href="https://github.com/JonathanRochelli" target="_blank" rel="noopener">JonathanRochelli</a>
+            Technical demo — <a href="https://github.com/JonathanRochelli" target="_blank" rel="noopener">JonathanRochelli</a>
         </footer>
 
         <script src="/static/app.js"></script>

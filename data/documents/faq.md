@@ -1,29 +1,29 @@
 # FAQ — NovaTrack
 
-## Quels sont les forfaits disponibles ?
+## What plans are available?
 
-NovaTrack propose trois forfaits :
+NovaTrack offers three plans:
 
-- **Solo** : 9 €/mois, jusqu'à 3 projets, 1 utilisateur.
-- **Équipe** : 24 €/mois par utilisateur, projets illimités, jusqu'à 20 utilisateurs, intégrations Slack et GitHub incluses.
-- **Entreprise** : tarif sur devis, utilisateurs illimités, historique illimité, support prioritaire et SSO (authentification unique).
+- **Solo**: $9/month, up to 3 projects, 1 user.
+- **Team**: $24/month per user, unlimited projects, up to 20 users, Slack and GitHub integrations included.
+- **Enterprise**: custom pricing, unlimited users, unlimited history, priority support, and SSO (single sign-on).
 
-## Puis-je changer de forfait à tout moment ?
+## Can I change plans at any time?
 
-Oui. Le changement de forfait est immédiat et le montant est calculé au prorata du temps restant sur le cycle de facturation en cours. Il n'y a aucun engagement de durée sur les forfaits Solo et Équipe.
+Yes. Plan changes take effect immediately and are prorated for the time remaining in the current billing cycle. There's no minimum commitment on the Solo and Team plans.
 
-## Comment fonctionne la période d'essai ?
+## How does the trial period work?
 
-Chaque nouveau compte bénéficie de 14 jours d'essai gratuit sur le forfait Équipe, sans carte bancaire requise. À la fin de la période d'essai, le compte repasse automatiquement en forfait Solo gratuit avec les limites associées (3 projets, 1 utilisateur) si aucun forfait payant n'a été choisi.
+Every new account gets a 14-day free trial of the Team plan, no credit card required. At the end of the trial, the account automatically drops to the free Solo plan and its limits (3 projects, 1 user) if no paid plan has been chosen.
 
-## Est-ce que mes données sont sauvegardées ?
+## Is my data backed up?
 
-Oui, une sauvegarde complète est effectuée toutes les 24 heures et conservée 30 jours. Sur le forfait Entreprise, des sauvegardes à la demande sont possibles via le support.
+Yes, a full backup runs every 24 hours and is kept for 30 days. On the Enterprise plan, on-demand backups are available through support.
 
-## Comment supprimer mon compte ?
+## How do I delete my account?
 
-La suppression du compte se fait depuis Paramètres > Compte > Supprimer le compte. Cette action est irréversible : toutes les données (projets, tâches, pièces jointes) sont définitivement effacées sous 48 heures. Il n'est pas possible de récupérer un compte supprimé, même en contactant le support.
+Account deletion is done from Settings > Account > Delete account. This action is irreversible: all data (projects, tasks, attachments) is permanently erased within 48 hours. A deleted account cannot be recovered, even by contacting support.
 
-## Proposez-vous une API ?
+## Do you offer an API?
 
-Une API REST est disponible sur les forfaits Équipe et Entreprise, avec une limite de 1000 requêtes par heure sur le forfait Équipe et une limite négociable sur le forfait Entreprise.
+A REST API is available on the Team and Enterprise plans, with a limit of 1000 requests per hour on the Team plan and a negotiable limit on the Enterprise plan.

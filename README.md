@@ -1,42 +1,42 @@
-# Agent RAG sur documents
+# RAG Document Agent
 
-Chatbot RAG (retrieval-augmented generation) : il répond à des questions en se basant **uniquement** sur un corpus de documents indexés, et cite systématiquement ses sources. Backend FastAPI + génération via l'API Claude (Anthropic), retrieval local avec ChromaDB.
+RAG (retrieval-augmented generation) chatbot: it answers questions based **only** on an indexed document corpus, and always cites its sources. FastAPI backend + generation via the Claude API (Anthropic), local retrieval with ChromaDB.
 
-Projet de démonstration pour un profil freelance orienté automatisation IA / agents LLM.
+Demo project for a freelance profile focused on AI automation / LLM agents.
 
-## Démo incluse
+## Included demo
 
-Le dépôt contient un corpus fictif de documentation produit (« NovaTrack », un outil de gestion de projet imaginaire) : guide produit, FAQ, politique de remboursement. Ça permet de tester l'agent immédiatement sans avoir besoin de vos propres documents.
+The repo ships with a fictional product documentation corpus ("NovaTrack", an imaginary project management tool): product guide, FAQ, refund policy. This lets you try the agent right away without needing your own documents.
 
 ## Architecture
 
 ```
-Question utilisateur
+User question
       │
       ▼
-Embeddings locaux (sentence-transformers, all-MiniLM-L6-v2)
+Local embeddings (sentence-transformers, all-MiniLM-L6-v2)
       │
       ▼
-Recherche vectorielle (ChromaDB, stockage local persistant)
+Vector search (ChromaDB, local persistent storage)
       │
       ▼
-Chunks pertinents + question ──► Claude (API Anthropic, réponse en streaming)
+Relevant chunks + question ──► Claude (Anthropic API, streamed response)
       │
       ▼
-Réponse citée, streamée vers le navigateur (SSE)
+Cited answer, streamed to the browser (SSE)
 ```
 
-Point clé : la génération (Claude) et les embeddings (sentence-transformers, local) sont découplés. Une seule clé API est nécessaire (Anthropic) ; la recherche vectorielle ne coûte rien et fonctionne hors-ligne.
+Key point: generation (Claude) and embeddings (sentence-transformers, local) are decoupled. Only one API key is needed (Anthropic); vector search costs nothing and works offline.
 
 ## Stack
 
-- **Backend** : FastAPI + Uvicorn
-- **LLM** : API Anthropic (Claude), réponses en streaming (SSE)
-- **Embeddings** : `sentence-transformers` (modèle local, gratuit, pas de clé API nécessaire)
-- **Vector store** : ChromaDB (persistant, local, aucun service externe)
-- **Frontend** : HTML/CSS/JS vanilla (pas de framework)
+- **Backend**: FastAPI + Uvicorn
+- **LLM**: Anthropic API (Claude), streamed responses (SSE)
+- **Embeddings**: `sentence-transformers` (local model, free, no API key needed)
+- **Vector store**: ChromaDB (persistent, local, no external service)
+- **Frontend**: vanilla HTML/CSS/JS (no framework)
 
-## Installation
+## Setup
 
 ```bash
 python -m venv .venv
@@ -48,7 +48,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Copiez `.env.example` en `.env` et renseignez votre clé API Anthropic :
+Copy `.env.example` to `.env` and add your Anthropic API key:
 
 ```bash
 cp .env.example .env
@@ -59,41 +59,41 @@ ANTHROPIC_API_KEY=sk-ant-...
 CLAUDE_MODEL=claude-opus-5
 ```
 
-Récupérez une clé sur [console.anthropic.com](https://console.anthropic.com/).
+Get a key at [console.anthropic.com](https://console.anthropic.com/).
 
-### Choisir le modèle
+### Choosing the model
 
-Le modèle par défaut est `claude-opus-5` (le plus capable). Pour une démo à moindre coût, changez simplement `CLAUDE_MODEL` dans `.env` :
+The default model is `claude-opus-5` (the most capable). For a lower-cost demo, just change `CLAUDE_MODEL` in `.env`:
 
-| Modèle | Usage recommandé |
+| Model | Recommended use |
 |---|---|
-| `claude-opus-5` | Qualité maximale, par défaut |
-| `claude-sonnet-5` | Bon compromis qualité/coût pour la plupart des cas |
-| `claude-haiku-4-5` | Le moins cher, pour des démos à fort volume de requêtes |
+| `claude-opus-5` | Maximum quality, default |
+| `claude-sonnet-5` | Good quality/cost balance for most cases |
+| `claude-haiku-4-5` | Cheapest, for high-volume demo traffic |
 
-## Utilisation
+## Usage
 
-**1. Indexer les documents** (à refaire à chaque fois que le corpus change) :
+**1. Index the documents** (redo whenever the corpus changes):
 
 ```bash
 python -m app.ingest
 ```
 
-**2. Lancer le serveur** :
+**2. Start the server**:
 
 ```bash
 uvicorn app.main:app --reload
 ```
 
-Ouvrez [http://localhost:8000](http://localhost:8000).
+Open [http://localhost:8000](http://localhost:8000).
 
-## Utiliser vos propres documents
+## Using your own documents
 
-1. Remplacez le contenu de `data/documents/` par vos fichiers `.md` ou `.txt` (un fichier par document source ; le nom du fichier sert d'identifiant de source dans les citations).
-2. Relancez `python -m app.ingest`.
-3. Redémarrez le serveur si besoin.
+1. Replace the contents of `data/documents/` with your own `.md` or `.txt` files (one file per source document; the file name is used as the source identifier in citations).
+2. Re-run `python -m app.ingest`.
+3. Restart the server if needed.
 
-Pour des PDF ou d'autres formats, il faut adapter `app/ingest.py` (`load_documents`) pour extraire le texte avant de le passer à `chunk_text`.
+For PDFs or other formats, adapt `app/ingest.py` (`load_documents`) to extract text before passing it to `chunk_text`.
 
 ## Tests
 
@@ -101,15 +101,15 @@ Pour des PDF ou d'autres formats, il faut adapter `app/ingest.py` (`load_documen
 pytest
 ```
 
-Les tests couvrent la logique de découpage en chunks (`app/chunking.py`) — la partie la plus facile à casser silencieusement lors d'une modification.
+Tests cover the chunking logic (`app/chunking.py`) — the part most likely to break silently when modified.
 
-## Limites de cette démo
+## Limits of this demo
 
-- Corpus statique : pas d'upload de documents depuis l'interface (ajouté volontairement hors scope pour limiter les coûts et les risques d'abus sur une démo publique).
-- Pas de gestion multi-utilisateur ni d'historique de conversation persistant.
-- Pas de cache de prompt (`prompt caching`) — pertinent seulement à partir d'un volume de requêtes significatif.
+- Static corpus: no document upload from the UI (deliberately out of scope, to limit cost and abuse risk on a public demo).
+- No multi-user support or persistent conversation history.
+- No prompt caching — only worth adding at meaningful request volume.
 
-## Aller plus loin
+## Going further
 
-- Ajouter l'upload de documents par l'utilisateur (avec limites de taille/type et isolation par session).
-- Ajouter un historique de conversation multi-tours.
+- Add user document uploads (with size/type limits and per-session isolation).
+- Add multi-turn conversation history.
