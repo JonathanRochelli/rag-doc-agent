@@ -27,7 +27,28 @@ def load_documents(documents_dir: Path):
             yield path
 
 
+def ingest_into(collection, model, documents_dir: Path = DOCUMENTS_DIR) -> int:
+    """Embed every document under documents_dir and add the chunks to an (empty) collection."""
+    ids, texts, metadatas = [], [], []
+    for path in load_documents(documents_dir):
+        content = path.read_text(encoding="utf-8")
+        for chunk in chunk_text(content, CHUNK_SIZE, CHUNK_OVERLAP):
+            ids.append(f"{path.stem}-{chunk.index}")
+            texts.append(chunk.text)
+            metadatas.append({"source": path.name})
+
+    if not texts:
+        print(f"Aucun document trouvé dans {documents_dir}")
+        return 0
+
+    embeddings = model.encode(texts, show_progress_bar=True).tolist()
+    collection.add(ids=ids, documents=texts, metadatas=metadatas, embeddings=embeddings)
+    print(f"{len(texts)} chunks indexés depuis {documents_dir}")
+    return len(texts)
+
+
 def ingest() -> int:
+    """CLI entry point: rebuild the collection from scratch (python -m app.ingest)."""
     CHROMA_DIR.mkdir(parents=True, exist_ok=True)
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
 
@@ -37,23 +58,9 @@ def ingest() -> int:
     collection = client.create_collection(CHROMA_COLLECTION)
 
     model = SentenceTransformer(EMBEDDING_MODEL)
-
-    ids, texts, metadatas = [], [], []
-    for path in load_documents(DOCUMENTS_DIR):
-        content = path.read_text(encoding="utf-8")
-        for chunk in chunk_text(content, CHUNK_SIZE, CHUNK_OVERLAP):
-            ids.append(f"{path.stem}-{chunk.index}")
-            texts.append(chunk.text)
-            metadatas.append({"source": path.name})
-
-    if not texts:
-        print(f"Aucun document trouvé dans {DOCUMENTS_DIR}")
-        return 0
-
-    embeddings = model.encode(texts, show_progress_bar=True).tolist()
-    collection.add(ids=ids, documents=texts, metadatas=metadatas, embeddings=embeddings)
-    print(f"{len(texts)} chunks indexés depuis {DOCUMENTS_DIR} -> {CHROMA_DIR}")
-    return len(texts)
+    count = ingest_into(collection, model)
+    print(f"-> {CHROMA_DIR}")
+    return count
 
 
 if __name__ == "__main__":

@@ -103,6 +103,25 @@ pytest
 
 Les tests couvrent la logique de découpage en chunks (`app/chunking.py`) — la partie la plus facile à casser silencieusement lors d'une modification.
 
+## Déploiement (Render, gratuit)
+
+L'app réindexe automatiquement le corpus de démo au démarrage si l'index est vide (`app/rag.py::ensure_index`, appelé au lifespan FastAPI) — nécessaire car le disque des hébergeurs gratuits est éphémère et repart à zéro à chaque déploiement/redémarrage. Aucune étape manuelle d'ingestion n'est donc requise après le déploiement.
+
+Le dépôt contient un `render.yaml` (blueprint) qui configure tout automatiquement.
+
+**Étapes (aucune ligne de commande nécessaire) :**
+
+1. Créer un compte sur [render.com](https://render.com) (connexion via GitHub, gratuit).
+2. Dans le dashboard : **New > Blueprint**, puis sélectionner le dépôt `rag-doc-agent`. Render détecte automatiquement `render.yaml`.
+3. Render demande la valeur d'une seule variable d'environnement : `ANTHROPIC_API_KEY` (les autres sont déjà définies dans le blueprint).
+4. Cliquer sur **Deploy**. Le premier build prend quelques minutes (installation de `torch`/`sentence-transformers`).
+
+L'app est ensuite accessible à une URL du type `https://rag-doc-agent.onrender.com`.
+
+**Limites du tier gratuit à connaître :**
+- Le service se met en veille après 15 minutes d'inactivité ; la requête suivante prend ~30-60s pour le réveiller.
+- 512 Mo de RAM — suffisant pour ce projet (petit modèle d'embeddings), mais si le déploiement échoue par manque de mémoire, passer au tier payant le moins cher (quelques dollars/mois) résout le problème.
+
 ## Limites de cette démo
 
 - Corpus statique : pas d'upload de documents depuis l'interface (ajouté volontairement hors scope pour limiter les coûts et les risques d'abus sur une démo publique).
@@ -113,4 +132,3 @@ Les tests couvrent la logique de découpage en chunks (`app/chunking.py`) — la
 
 - Ajouter l'upload de documents par l'utilisateur (avec limites de taille/type et isolation par session).
 - Ajouter un historique de conversation multi-tours.
-- Déployer sur un service comme Render, Fly.io ou Railway pour avoir une démo publique liée depuis un portfolio.

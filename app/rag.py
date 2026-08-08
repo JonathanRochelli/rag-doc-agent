@@ -48,6 +48,19 @@ def build_context_block(chunks: list[dict]) -> str:
     )
 
 
+def ensure_index() -> None:
+    """Index the demo corpus on first boot if the collection is empty.
+
+    Hosting platforms with an ephemeral disk (Render/Fly free tiers) wipe
+    data/chroma on every deploy or restart, so ingestion must be able to
+    run automatically at startup rather than only via the CLI.
+    """
+    if _collection.count() == 0:
+        from app.ingest import ingest_into
+
+        ingest_into(_collection, _embedder)
+
+
 async def stream_answer(question: str) -> AsyncIterator[dict]:
     chunks = retrieve(question)
     context_block = build_context_block(chunks)

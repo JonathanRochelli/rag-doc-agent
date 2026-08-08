@@ -1,4 +1,5 @@
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -6,12 +7,19 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app.rag import stream_answer
+from app.rag import ensure_index, stream_answer
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
 
-app = FastAPI(title="Agent RAG sur documents")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_index()
+    yield
+
+
+app = FastAPI(title="Agent RAG sur documents", lifespan=lifespan)
 
 
 class ChatRequest(BaseModel):
