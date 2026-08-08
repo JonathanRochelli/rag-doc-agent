@@ -21,10 +21,8 @@ _collection = _chroma_client.get_or_create_collection(CHROMA_COLLECTION)
 _anthropic = AsyncAnthropic(api_key=ANTHROPIC_API_KEY or None)
 
 # The embedding model (torch + a HF download on first boot) and the demo-corpus
-# indexing are deferred until first use instead of running at import/startup time.
-# Loading them eagerly can take well over a minute on constrained hosting (e.g.
-# Render's free tier), which makes the web server miss the platform's port-scan
-# / health-check window before it even starts listening.
+# indexing are deferred until first use instead of running at import/startup time,
+# so the web server can start accepting connections immediately.
 _embedder: SentenceTransformer | None = None
 _ready_lock = asyncio.Lock()
 _index_ready = False
