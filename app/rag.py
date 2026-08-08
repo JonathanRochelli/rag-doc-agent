@@ -1,4 +1,5 @@
 """Retrieval-augmented generation: retrieve relevant chunks, then stream a cited answer from Claude."""
+import asyncio
 from typing import AsyncIterator
 
 import anthropic
@@ -17,8 +18,16 @@ from app.config import (
 
 _chroma_client = chromadb.PersistentClient(path=str(CHROMA_DIR))
 _collection = _chroma_client.get_or_create_collection(CHROMA_COLLECTION)
-_embedder = SentenceTransformer(EMBEDDING_MODEL)
 _anthropic = AsyncAnthropic(api_key=ANTHROPIC_API_KEY or None)
+
+# The embedding model (torch + a HF download on first boot) and the demo-corpus
+# indexing are deferred until first use instead of running at import/startup time.
+# Loading them eagerly can take well over a minute on constrained hosting (e.g.
+# Render's free tier), which makes the web server miss the platform's port-scan
+# / health-check window before it even starts listening.
+_embedder: SentenceTransformer | None = None
+_ready_lock = asyncio.Lock()
+_index_ready = False
 
 SYSTEM_PROMPT = """Tu es un assistant qui répond aux questions UNIQUEMENT à partir des documents fournis dans le message de l'utilisateur.
 
@@ -29,8 +38,37 @@ Règles :
 - Réponds de façon concise et directe."""
 
 
-def retrieve(query: str, top_k: int = TOP_K) -> list[dict]:
-    query_embedding = _embedder.encode([query]).tolist()
+async def _ensure_ready() -> SentenceTransformer:
+    """Load the embedding model and index the demo corpus, once, on first use."""
+    global _embedder, _index_ready
+
+    async with _ready_lock:
+        if _embedder is None:
+            _embedder = await asyncio.to_thread(SentenceTransformer, EMBEDDING_MODEL)
+        if not _index_ready:
+            if _collection.count() == 0:
+                from app.ingest import ingest_into
+
+                await asyncio.to_thread(ingest_into, _collection, _embedder)
+            _index_ready = True
+
+    return _embedder
+
+
+async def warm_up() -> None:
+    """Fire-and-forget startup hook: pre-load the model/index in the background
+    so the web server can bind its port immediately (see module docstring note)."""
+    try:
+        await _ensure_ready()
+    except Exception:
+        # A failed warm-up isn't fatal — the first real request will retry
+        # via _ensure_ready() and surface the error there instead.
+        pass
+
+
+async def retrieve(query: str, top_k: int = TOP_K) -> list[dict]:
+    embedder = await _ensure_ready()
+    query_embedding = await asyncio.to_thread(lambda: embedder.encode([query]).tolist())
     results = _collection.query(query_embeddings=query_embedding, n_results=top_k)
     documents = results.get("documents") or [[]]
     metadatas = results.get("metadatas") or [[]]
@@ -48,21 +86,8 @@ def build_context_block(chunks: list[dict]) -> str:
     )
 
 
-def ensure_index() -> None:
-    """Index the demo corpus on first boot if the collection is empty.
-
-    Hosting platforms with an ephemeral disk (Render/Fly free tiers) wipe
-    data/chroma on every deploy or restart, so ingestion must be able to
-    run automatically at startup rather than only via the CLI.
-    """
-    if _collection.count() == 0:
-        from app.ingest import ingest_into
-
-        ingest_into(_collection, _embedder)
-
-
 async def stream_answer(question: str) -> AsyncIterator[dict]:
-    chunks = retrieve(question)
+    chunks = await retrieve(question)
     context_block = build_context_block(chunks)
     user_message = f"<documents>\n{context_block}\n</documents>\n\nQuestion : {question}"
 

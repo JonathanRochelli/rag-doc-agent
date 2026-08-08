@@ -1,3 +1,4 @@
+import asyncio
 import json
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -7,7 +8,7 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from app.rag import ensure_index, stream_answer
+from app.rag import stream_answer, warm_up
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
@@ -15,7 +16,9 @@ STATIC_DIR = BASE_DIR / "static"
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    ensure_index()
+    # Fire-and-forget: don't block server startup on model loading / indexing,
+    # or the port never opens in time on constrained hosting (see app/rag.py).
+    asyncio.create_task(warm_up())
     yield
 
 
